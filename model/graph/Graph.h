@@ -46,8 +46,8 @@ public:
     void removeVertex(Vertex& vertex);
     void removeEdge(Edge<T>& edge);
     Vertex getNext(Vertex& vertex);
-    void dfs(Vertex& start, map<Vertex, bool>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool isCircle);
-    void Deikstra()
+    void dfsForTopologicalSort(Vertex& vertex, map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle);
+    void Deikstra();
     ~Graph();
 };
 
@@ -115,13 +115,20 @@ Vertex Graph<T>::getNext(Vertex& vertex) {
 }
 
 template<typename T>
-void Graph<T>::dfs(Vertex& vertex, map<Vertex, bool> &used, vector<Vertex> &topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool isCircle) {
-    used[vertex] = true;
+void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vector<Vertex> &topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle) {
+    used[vertex] = 1;
     int index = getVertexIndex(vertex);
-    for (int i = 0; i < list.size(); ++i) {
-
+    for (int i = 0; i < list[index].second.size(); ++i) {
+        Vertex next = list[index].second[i].vertex2;
+        if (used[next] == 1) {
+            isCircle = true;
+            return;
+        } else if (used[next] == 0) dfs(next, used, topSort, array, isCircle);
+        if (isCircle) return;
     }
-    //TODO Finish later, need to fix issue with
+    used[vertex] = 2;
+    topSort.push_back(vertex);
+    //Looks like it should work
 }
 
 
