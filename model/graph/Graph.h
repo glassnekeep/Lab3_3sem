@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -32,30 +33,38 @@ public:
 };
 
 template <typename T>
+bool compareByValue(const Edge<T>& edge1, const Edge<T>& edge2) {
+    return (edge1.value < edge2.value);
+}
+
+template <typename T>
 class Graph {
     vector<pair<Vertex, vector<Edge<T>>>> list; //Incidence list
+private:
+    int getVertexIndex(Vertex& vertex);
+    Vertex getNext(Vertex& vertex);
+    void dfsForTopologicalSort(Vertex& vertex, map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle);
+    void topologicalSort(map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle);
+    void dfsForConnectivityComponents(Vertex& vertex, map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components);
+    void countComponents(map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components, vector<vector<Vertex>>& allComponents);
+    int countEdges();
 public:
-    Graph();
-    Graph(vector<pair<Vertex, vector<Edge<T>>>> newList) {
+    Graph() = default;
+    explicit Graph(vector<pair<Vertex, vector<Edge<T>>>> newList) {
         list = newList;
     };
     bool findVertex(Vertex& vertex);
-    int getVertexIndex(Vertex& vertex);
     void addEdge(Vertex& startVertex, Vertex& endVertex, T& val);
     void addVertex(Vertex& vertex);
     void removeVertex(Vertex& vertex);
     void removeEdge(Edge<T>& edge);
-    Vertex getNext(Vertex& vertex);
-    void dfsForTopologicalSort(Vertex& vertex, map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle);
-    void topologicalSort(map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle);
     vector<Vertex> topologicalSortResult();
-    void dfsForConnectivityComponents(Vertex& vertex, map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components);
-    void countComponents(map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components, vector<vector<Vertex>>& allComponents);
     vector<vector<Vertex>> connectivityComponentsResult();
     //Here should be strong connectivity components;
-    map<pair<Vertex, Vertex>, T> findTheShortestPaths(); //Floyd algorithm
-    void Deikstra();
-    ~Graph();
+    map<pair<Vertex, Vertex>, T> findTheShortestPaths(); //Floyd's algorithm
+    vector<Edge<T>> findTheMinimumSkeleton(); //Kruskal's algorithm
+    string printGraph();
+    ~Graph() = default;
 };
 
 template<typename T>
@@ -215,6 +224,68 @@ map<pair<Vertex, Vertex>, T> Graph<T>::findTheShortestPaths() {
         }
     }
     return matrix;
+}
+
+template<typename T>
+vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
+    set<Edge<T>> edgeSet = set<Edge<T>>();
+    for (int i = 0; i < list.size(); ++i) {
+        for (int j = 0; j < list[i].second.size(); ++j) {
+            Edge<T> edge = list[i].second[j];
+            edgeSet.insert(edge);
+        }
+    }
+    vector<Edge<T>> edges = vector(edgeSet.begin(), edgeSet.end());
+    vector<Edge<T>> result = vector<Edge<T>>();
+    sort(edges.begin(), edges.end(), compareByValue);
+    map<Vertex, int> tree = map<Vertex, int>();
+    for (int i = 0; i < list.size(); ++i) {
+        tree[list[i].first] = i;
+    }
+    int cost = 1;
+    for (int i = 0; i < edges.size(); ++i) {
+        Vertex vertex1 = edges[i].vertex1;
+        Vertex vertex2 = edges[i].vertex2;
+        T value = edges[i].value;
+        if (tree[vertex1] != tree[vertex2]) {
+            cost += 1;
+            result.push_back(edges[i]);
+            int oldId = tree[vertex2];
+            int newId = tree[vertex1];
+            for (int j = 0; j < list.size(); ++j) {
+                Vertex vertex = list[i].first;
+                if (tree[vertex] == oldId) {
+                    tree[vertex] = newId;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+template<typename T>
+int Graph<T>::countEdges() {
+    int result = 0;
+    for (int i = 0; i < list.size(); ++i) {
+        result += list[i].second.size();
+    }
+    return result / 2;
+}
+
+template<typename T>
+string Graph<T>::printGraph() {
+    string result{};
+    string graphInfo = string("Graph: vertexes = ") + list.size() + string(", edges = ") + countEdges() + "\n";
+    string array = {};
+    for (int i = 0; i < list.size(); ++i) {
+        string currentVertex = string("Vertex: " + list[i].first.name + ", Edges: ");
+        for (int j = 0; j < list[i].second.size(); ++j) {
+            currentVertex += "(" + list[i].second[j].vertex1.name + ", " + list[i].second[j].vertex2.name + "), ";
+        }
+        array += currentVertex + "\n";
+    }
+    result += graphInfo + array;
+    return result;
 }
 
 
