@@ -18,7 +18,8 @@ struct Vertex {
     string name;
 
     bool operator==(const Vertex& vertex) const {
-        return vertex.name == this -> name;
+        bool res = vertex.name == this -> name;
+        return res;
     }
 
     bool operator<(const Vertex& vertex) const {
@@ -85,6 +86,7 @@ private:
     void dfsForConnectivityComponents(Vertex& vertex, map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components);
     void countComponents(map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components, vector<vector<Vertex>>& allComponents);
     int countEdges();
+    bool edgeBetween(Vertex vertex1, Vertex vertex2);
 public:
     Graph() = default;
     explicit Graph(vector<pair<Vertex, vector<Edge<T>>>> newList) {
@@ -124,7 +126,7 @@ template<typename T>
 void Graph<T>::addEdge(Edge<T>& edge) {
     int firstIndex = getVertexIndex(edge.getFirstVertex());
     int secondIndex = getVertexIndex(edge.getSecondVertex());
-    if (firstIndex != -1 && secondIndex != -1) {
+    if (firstIndex != -1 && secondIndex != -1 && !edgeBetween(edge.getFirstVertex(), edge.getSecondVertex()) && firstIndex != secondIndex) {
         list[firstIndex].second.push_back(edge);
         list[secondIndex].second.push_back(edge);
     }
@@ -310,6 +312,22 @@ int Graph<T>::countEdges() {
         result += list[i].second.size();
     }
     return result / 2;
+}
+
+template<typename T>
+bool Graph<T>::edgeBetween(Vertex vertex1, Vertex vertex2) {
+    int index1 = getVertexIndex(vertex1);
+    int index2 = getVertexIndex(vertex2);
+    vector<Edge<T>> array = list[index1].second;
+    bool contains = false;
+    for (int i = 0; i < array.size(); ++i) {
+        if (array[i].getFirstVertex() == vertex2 || array[i].getSecondVertex() == vertex2) contains = true;
+    }
+    array = list[index2].second;
+    for (int i = 0; i < array.size(); ++i) {
+        if (array[i].getFirstVertex() == vertex1 || array[i].getSecondVertex() == vertex1) contains = true;
+    }
+    return contains;
 }
 
 template<typename T>

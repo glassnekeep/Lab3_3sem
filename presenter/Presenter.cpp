@@ -16,7 +16,8 @@ void Presenter::generateGraph(int count) {
         array.emplace_back(vertex, vector<Edge<int>>());//Changed push_back because of IDE hint, may require fixes
     }
     graph = Graph<int>(array);
-    int edgeCount = rand() % ((count * (count - 1)) / 2);
+    int max = (count * (count - 1)) / 2;
+    int edgeCount = rand() % (max / 2);
     for (int i = 0; i < edgeCount; ++i) {
         Vertex vertex1 = { to_string(rand() % count) };
         Vertex vertex2 = { to_string(rand() % count) };

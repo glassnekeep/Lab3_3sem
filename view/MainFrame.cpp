@@ -12,7 +12,7 @@ MainFrame::MainFrame(const wxString &title): wxFrame(nullptr, wxID_ANY, title) {
     panel = new wxPanel(this);
     panel->SetBackgroundColour(*wxLIGHT_GREY);
     txtSlider = new wxStaticText(panel, wxID_ANY, "Number of elements: ", wxPoint(30, 45), wxDefaultSize);
-    slider = new wxSlider(panel, wxID_ANY, 5, 5, 50, wxPoint(30, 65), wxSize(200, -1), wxSL_LABELS);
+    slider = new wxSlider(panel, wxID_ANY, 6, 6, 50, wxPoint(30, 65), wxSize(200, -1), wxSL_LABELS);
     buttonCreateGraph = new wxButton(panel, wxID_ANY, "Create Graph", wxPoint(30, 110), wxSize(160, -1));
     buttonPrintGraph = new wxButton(panel, wxID_ANY, "Print Graph", wxPoint(30, 140), wxSize(160, -1));
     buttonTopologicalSort = new wxButton(panel, wxID_ANY, "Topological sort", wxPoint(30, 170), wxSize(160, -1));
