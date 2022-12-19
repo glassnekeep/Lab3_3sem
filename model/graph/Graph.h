@@ -16,6 +16,10 @@ using namespace std;
 
 struct Vertex {
     string name;
+
+    bool operator==(const Vertex& vertex) const {
+        return vertex.name == this -> name;
+    }
 };
 
 template <typename T>
@@ -30,6 +34,14 @@ public:
         value = val;
     }
     ~Edge();
+
+    bool operator==(const Edge<T>& edge) const {
+        return edge.vertex1 == this -> vertex1 && edge.vertex2 == this -> vertex2 && edge.value == this -> value;
+    }
+
+    string toString() {
+        return "Edge: vertex1 = " + vertex1.name + ", vertex2 = " + vertex2.name + ", value = " + value;
+    }
 };
 
 template <typename T>
@@ -240,7 +252,8 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
     sort(edges.begin(), edges.end(), compareByValue);
     map<Vertex, int> tree = map<Vertex, int>();
     for (int i = 0; i < list.size(); ++i) {
-        tree[list[i].first] = i;
+        //Added this if myself because there might be a graph with more than 1 connectivity component
+        if (!list[i].second.empty()) tree[list[i].first] = i;
     }
     int cost = 1;
     for (int i = 0; i < edges.size(); ++i) {
