@@ -9,10 +9,9 @@
 
 using namespace std;
 
-template <typename T>
 class Presenter {
 private:
-    Graph<T> graph;
+    Graph<int> graph;
     int size;
 public:
     void generateGraph(int count);

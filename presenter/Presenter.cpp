@@ -6,15 +6,14 @@
 
 using namespace std;
 
-template<typename T>
-void Presenter<T>::generateGraph(int count) {
+void Presenter::generateGraph(int count) {
     size = count;
-    vector<pair<Vertex, vector<Edge<T>>>> array = vector<pair<Vertex, vector<Edge<T>>>>();
+    vector<pair<Vertex, vector<Edge<int>>>> array = vector<pair<Vertex, vector<Edge<int>>>>();
     vector<vector<int>> matrix = vector<vector<int>>();
     matrix.assign(count, vector<int>(count));
     for (int i = 0; i < count; ++i) {
         Vertex vertex = {to_string(i)};
-        array.push_back(make_pair(vertex, vector<Edge<T>>()));
+        array.emplace_back(vertex, vector<Edge<int>>());//Changed push_back because of IDE hint, may require fixes
     }
     graph = Graph<int>(array);
     int edgeCount = rand() % ((count * (count - 1)) / 2);
@@ -27,8 +26,7 @@ void Presenter<T>::generateGraph(int count) {
     }
 }
 
-template<typename T>
-string Presenter<T>::topologicalSort() {
+string Presenter::topologicalSort() {
     if (graph.connectivityComponentsResult().size() > 1) return "The graph contains more than 1 component of connectivity";
     vector<Vertex> array = graph.topologicalSortResult();
     string result = "Topological sort array:\n";
@@ -38,8 +36,7 @@ string Presenter<T>::topologicalSort() {
     return result;
 }
 
-template<typename T>
-string Presenter<T>::connectivityComponents() {
+string Presenter::connectivityComponents() {
     vector<vector<Vertex>> array = graph.connectivityComponentsResult();
     string result = "Connectivity components:\n";
     for (int i = 0; i < array.size(); ++i) {
@@ -52,8 +49,7 @@ string Presenter<T>::connectivityComponents() {
     return result;
 }
 
-template<typename T>
-string Presenter<T>::findShortestPaths() {
+string Presenter::findShortestPaths() {
     map<pair<Vertex, Vertex>, int> paths = graph.findTheShortestPaths();
     string result = "Shortest paths:\n";
     for (auto& item: paths) {
@@ -62,8 +58,7 @@ string Presenter<T>::findShortestPaths() {
     return result;
 }
 
-template<typename T>
-string Presenter<T>::findTheMinimumSkeleton() {
+string Presenter::findTheMinimumSkeleton() {
     if (graph.connectivityComponentsResult().size() > 1) return "Impossible to find skeleton cause the graph contains more than 1 component of connectivity";
     vector<Edge<int>> skeleton = graph.findTheMinimumSkeleton();
     string result = "Minimum skeleton:\n";
@@ -73,7 +68,6 @@ string Presenter<T>::findTheMinimumSkeleton() {
     return result;
 }
 
-template<typename T>
-string Presenter<T>::printGraph() {
+string Presenter::printGraph() {
     return graph.printGraph();
 }

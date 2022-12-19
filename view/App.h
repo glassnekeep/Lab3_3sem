@@ -5,9 +5,11 @@
 #ifndef LAB3_3SEM_APP_H
 #define LAB3_3SEM_APP_H
 
+#include <wx/wx.h>
 
-class App {
-
+class App: public wxApp {
+public:
+    bool onInit();
 };
 
 

@@ -8,7 +8,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <algorithm>
 #include <map>
 #include <set>
 
@@ -20,10 +19,15 @@ struct Vertex {
     bool operator==(const Vertex& vertex) const {
         return vertex.name == this -> name;
     }
+
+    bool operator<(const Vertex& vertex) const {
+        return this -> name < vertex.name;
+    }
 };
 
 template <typename T>
 class Edge {
+private:
     Vertex vertex1;
     Vertex vertex2;
     T value;
@@ -35,25 +39,41 @@ public:
     }
     ~Edge();
 
+    Vertex getFirstVertex() {
+        return vertex1;
+    }
+
+    Vertex getSecondVertex() {
+        return vertex2;
+    }
+
+    T getValue() {
+        return value;
+    }
+
     bool operator==(const Edge<T>& edge) const {
         return edge.vertex1 == this -> vertex1 && edge.vertex2 == this -> vertex2 && edge.value == this -> value;
     }
 
+    bool operator<(const Edge<T>& edge) const {
+        return this -> value < edge.value;
+    }
+
     string toString() {
-        return "Edge: vertex1 = " + vertex1.name + ", vertex2 = " + vertex2.name + ", value = " + value;
+        return "Edge: vertex1 = " + vertex1.name + ", vertex2 = " + vertex2.name + ", value = " + to_string(value);
     }
 };
 
 template <typename T>
 bool compareByValue(const Edge<T>& edge1, const Edge<T>& edge2) {
-    return (edge1.value < edge2.value);
+    return (edge1.getValue() < edge2.getValue());
 }
 
 template <typename T>
 class Graph {
     vector<pair<Vertex, vector<Edge<T>>>> list; //Incidence list
 private:
-    int getVertexIndex(Vertex& vertex);
+    int getVertexIndex(Vertex vertex);
     Vertex getNext(Vertex& vertex);
     void dfsForTopologicalSort(Vertex& vertex, map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle);
     void topologicalSort(map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle);
@@ -66,7 +86,7 @@ public:
         list = newList;
     };
     bool findVertex(Vertex& vertex);
-    void addEdge(Vertex& startVertex, Vertex& endVertex, T& val);
+    void addEdge(Edge<T>& edge);
     void addVertex(Vertex& vertex);
     void removeVertex(Vertex& vertex);
     void removeEdge(Edge<T>& edge);
@@ -88,7 +108,7 @@ bool Graph<T>::findVertex(Vertex &vertex) {
 }
 
 template<typename T>
-int Graph<T>::getVertexIndex(Vertex &vertex) {
+int Graph<T>::getVertexIndex(Vertex vertex) {
     for (int i = 0; i < list.size(); ++i) {
         if (list[i].first == vertex) return i;
     }
@@ -96,13 +116,12 @@ int Graph<T>::getVertexIndex(Vertex &vertex) {
 }
 
 template<typename T>
-void Graph<T>::addEdge(Vertex &startVertex, Vertex &endVertex, T &val) {
-    Edge<T>* newEdge = new Edge(startVertex, endVertex, val);
-    int firstIndex = getVertexIndex(startVertex);
-    int secondIndex = getVertexIndex(endVertex);
-    if (firstIndex != - 1 && secondIndex != -1) {
-        list[firstIndex].second.push_back(newEdge);
-        list[secondIndex].second.push_back(newEdge);
+void Graph<T>::addEdge(Edge<T>& edge) {
+    int firstIndex = getVertexIndex(edge.getFirstVertex());
+    int secondIndex = getVertexIndex(edge.getSecondVertex());
+    if (firstIndex != -1 && secondIndex != -1) {
+        list[firstIndex].second.push_back(edge);
+        list[secondIndex].second.push_back(edge);
     }
     //TODO Here required to process the case where one of the vertexes does not belong to this graph
 }
@@ -147,11 +166,11 @@ void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vec
     used[vertex] = 1;
     int index = getVertexIndex(vertex);
     for (int i = 0; i < list[index].second.size(); ++i) {
-        Vertex next = list[index].second[i].vertex2;
+        Vertex next = list[index].second[i].getSecondVertex();
         if (used[next] == 1) {
             isCircle = true;
             return;
-        } else if (used[next] == 0) dfs(next, used, topSort, array, isCircle);
+        } else if (used[next] == 0) dfsForTopologicalSort(next, used, topSort, array, isCircle);
         if (isCircle) return;
     }
     used[vertex] = 2;
@@ -162,7 +181,7 @@ void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vec
 template<typename T>
 void Graph<T>::topologicalSort(map<Vertex, int> &used, vector<Vertex> &topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle) {
     for (int i = 0; i < n; ++i ) {
-        Vertex vertex = getVertexIndex(i);
+        Vertex vertex = list[i].first;
         if (!used[vertex]) dfsForTopologicalSort(array[i].first, used, topSort, array, isCircle);
     }
     reverse(topSort.begin(), topSort.end());
@@ -187,7 +206,7 @@ void Graph<T>::dfsForConnectivityComponents(Vertex &vertex, map<Vertex, int> &us
     components.push_back(vertex);
     int index = getVertexIndex(vertex);
     for (int i = 0; i < list[index].second.size(); ++i) {
-        Vertex next = list[index].second[i].vertex2;
+        Vertex next = list[index].second[i].getSecondVertex();
         if (!used[next]) dfsForConnectivityComponents(next, used, array, components);
     }
 }
@@ -218,9 +237,9 @@ map<pair<Vertex, Vertex>, T> Graph<T>::findTheShortestPaths() {
     map<pair<Vertex, Vertex>, T> matrix = map<pair<Vertex, Vertex>, T>();
     for (int i = 0; i < list.size(); ++i) {
         for (int j = 0; j < list[i].second.size(); ++j) {
-            Vertex vertex1 = list[i].second[j].vertex1;
-            Vertex vertex2 = list[i].second[j].vertex2;
-            T value = list[i].second[j].value;
+            Vertex vertex1 = list[i].second[j].getFirstVertex();
+            Vertex vertex2 = list[i].second[j].getSecondVertex();
+            T value = list[i].second[j].getValue();
             pair<Vertex, Vertex> pair = make_pair(vertex1, vertex2);
             matrix[pair] = value;
         }
@@ -228,9 +247,9 @@ map<pair<Vertex, Vertex>, T> Graph<T>::findTheShortestPaths() {
     for (int k = 0; k < list.size(); ++k) {
         for (int i = 0; i < list.size(); ++i) {
             for (int j = 0; j < list.size(); ++j) {
-                pair<Vertex, Vertex> pair1 = make_pair(list[i], list[j]);
-                pair<Vertex, Vertex> pair2 = make_pair(list[i], list[k]);
-                pair<Vertex, Vertex> pair3 = make_pair(list[k], list[j]);
+                pair<Vertex, Vertex> pair1 = make_pair(list[i].first, list[j].first);
+                pair<Vertex, Vertex> pair2 = make_pair(list[i].first, list[k].first);
+                pair<Vertex, Vertex> pair3 = make_pair(list[k].first, list[j].first);
                 matrix[pair1] = min(matrix[pair1], matrix[pair2] + matrix[pair3]);
             }
         }
@@ -249,7 +268,7 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
     }
     vector<Edge<T>> edges = vector(edgeSet.begin(), edgeSet.end());
     vector<Edge<T>> result = vector<Edge<T>>();
-    sort(edges.begin(), edges.end(), compareByValue);
+    std::sort(edges.begin(), edges.end(), compareByValue);
     map<Vertex, int> tree = map<Vertex, int>();
     for (int i = 0; i < list.size(); ++i) {
         //Added this if myself because there might be a graph with more than 1 connectivity component
@@ -257,9 +276,9 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
     }
     int cost = 1;
     for (int i = 0; i < edges.size(); ++i) {
-        Vertex vertex1 = edges[i].vertex1;
-        Vertex vertex2 = edges[i].vertex2;
-        T value = edges[i].value;
+        Vertex vertex1 = edges[i].getFirstVertex();
+        Vertex vertex2 = edges[i].getSecondVertex();
+        T value = edges[i].getValue();
         if (tree[vertex1] != tree[vertex2]) {
             cost += 1;
             result.push_back(edges[i]);
@@ -288,12 +307,12 @@ int Graph<T>::countEdges() {
 template<typename T>
 string Graph<T>::printGraph() {
     string result{};
-    string graphInfo = string("Graph: vertexes = ") + list.size() + string(", edges = ") + countEdges() + "\n";
+    string graphInfo = string("Graph: vertexes = ") + to_string(list.size()) + ", edges = " + to_string(countEdges()) + "\n";
     string array = {};
     for (int i = 0; i < list.size(); ++i) {
         string currentVertex = string("Vertex: " + list[i].first.name + ", Edges: ");
         for (int j = 0; j < list[i].second.size(); ++j) {
-            currentVertex += "(" + list[i].second[j].vertex1.name + ", " + list[i].second[j].vertex2.name + "), ";
+            currentVertex += "(" + list[i].second[j].getFirstVertex().name + ", " + list[i].second[j].getSecondVertex().name + "), ";
         }
         array += currentVertex + "\n";
     }
