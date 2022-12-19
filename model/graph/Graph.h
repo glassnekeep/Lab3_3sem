@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <map>
 #include <set>
 
@@ -37,7 +38,7 @@ public:
         vertex2 = endVertex;
         value = val;
     }
-    ~Edge();
+    //~Edge();
 
     Vertex getFirstVertex() {
         return vertex1;
@@ -64,10 +65,14 @@ public:
     }
 };
 
-template <typename T>
-bool compareByValue(const Edge<T>& edge1, const Edge<T>& edge2) {
-    return (edge1.getValue() < edge2.getValue());
-}
+//template <typename T>
+//bool compareByValue(const Edge<T>& edge1, const Edge<T>& edge2) {
+//    return (edge1.getValue() < edge2.getValue());
+//}
+
+//extern bool compareByValue(Edge<int>& edge1, Edge<int>& edge2) {
+//    return (edge1.getValue() < edge2.getValue());
+//}
 
 template <typename T>
 class Graph {
@@ -268,7 +273,10 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
     }
     vector<Edge<T>> edges = vector(edgeSet.begin(), edgeSet.end());
     vector<Edge<T>> result = vector<Edge<T>>();
-    std::sort(edges.begin(), edges.end(), compareByValue);
+    sort(edges.begin(), edges.end(), [](Edge<T> edge1, Edge<T> edge2){
+        return edge1.getValue() < edge2.getValue();
+    });
+//    sort(edges.begin(), edges.end(), compareByValue);
     map<Vertex, int> tree = map<Vertex, int>();
     for (int i = 0; i < list.size(); ++i) {
         //Added this if myself because there might be a graph with more than 1 connectivity component

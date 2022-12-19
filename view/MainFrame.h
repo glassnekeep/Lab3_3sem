@@ -17,9 +17,18 @@ public:
 private:
     wxPanel* panel;
     wxSlider* slider;
+    wxStaticText* txtSlider;
     wxTextCtrl* textPrint;
-    wxButton* buttonCreateGraph, *buttonTopologicalSort, *buttonConnectivityComponents, *buttonFindShortestPaths, *buttonFindMinimumSkeleton, *buttonPrintGraph;
+    wxButton* buttonCreateGraph, *buttonTopologicalSort, *buttonConnectivityComponents, *buttonFindShortestPaths, *buttonFindMinimumSkeleton, *buttonPrintGraph, *buttonClearText;
     Presenter presenter;
+
+    void onCreateGraphButtonClicked(wxCommandEvent& event);
+    void onTopologicalSortButtonClicked(wxCommandEvent& event);
+    void onConnectivityComponentsButtonClicked(wxCommandEvent& event);
+    void onFindShortestPathsButtonClicked(wxCommandEvent& event);
+    void onFindMinimumSkeletonButtonClicked(wxCommandEvent& event);
+    void onPrintGraphButtonClicked(wxCommandEvent& event);
+    void onClearTextButtonClicked(wxCommandEvent& event);
 };
 
 

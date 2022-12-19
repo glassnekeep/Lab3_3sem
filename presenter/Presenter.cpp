@@ -27,7 +27,7 @@ void Presenter::generateGraph(int count) {
 }
 
 string Presenter::topologicalSort() {
-    if (graph.connectivityComponentsResult().size() > 1) return "The graph contains more than 1 component of connectivity";
+    if (graph.connectivityComponentsResult().size() > 1) return "The graph contains more than 1 component of connectivity\n";
     vector<Vertex> array = graph.topologicalSortResult();
     string result = "Topological sort array:\n";
     for (int i = 0; i < result.size(); ++i) {
@@ -40,7 +40,7 @@ string Presenter::connectivityComponents() {
     vector<vector<Vertex>> array = graph.connectivityComponentsResult();
     string result = "Connectivity components:\n";
     for (int i = 0; i < array.size(); ++i) {
-        result += string("Connectivity component №") + to_string(i) + ":";
+        result += string("Connectivity component #") + to_string(i) + ":";
         for (auto & j : array[i]) {
             result += " " + j.name + ",";
         }
@@ -59,7 +59,7 @@ string Presenter::findShortestPaths() {
 }
 
 string Presenter::findTheMinimumSkeleton() {
-    if (graph.connectivityComponentsResult().size() > 1) return "Impossible to find skeleton cause the graph contains more than 1 component of connectivity";
+    if (graph.connectivityComponentsResult().size() > 1) return "Impossible to find skeleton cause the graph contains more than 1 component of connectivity\n";
     vector<Edge<int>> skeleton = graph.findTheMinimumSkeleton();
     string result = "Minimum skeleton:\n";
     for (auto& item: skeleton) {
