@@ -112,7 +112,31 @@ void testShortestPaths() {
 }
 
 void testFindMinimalSkeleton() {
-
+    Graph<int> graph = Graph<int>();
+    Vertex vertex0 = { "0" };
+    Vertex vertex1 = { "1" };
+    Vertex vertex2 = { "2" };
+    Vertex vertex3 = { "3" };
+    graph.addVertex(vertex0);
+    graph.addVertex(vertex1);
+    graph.addVertex(vertex2);
+    graph.addVertex(vertex3);
+    Edge<int> edge0 = Edge(vertex0, vertex3, 1);
+    Edge<int> edge1 = Edge(vertex3, vertex1, 2);
+    Edge<int> edge2 = Edge(vertex3, vertex2, 3);
+    Edge<int> edge3 = Edge(vertex2, vertex1, 4);
+    graph.addEdge(edge0);
+    graph.addEdge(edge1);
+    graph.addEdge(edge2);
+    graph.addEdge(edge3);
+    vector<Edge<int>> tree = graph.findTheMinimumSkeleton();
+    vector<Edge<int>> needed = vector<Edge<int>>();
+    needed.push_back(edge0);
+    needed.push_back(edge1);
+    needed.push_back(edge2);
+    for (int i = 0; i < needed.size(); ++i) {
+        assert(needed[i] == tree[i]);
+    }
 }
 
 void runTests() {
