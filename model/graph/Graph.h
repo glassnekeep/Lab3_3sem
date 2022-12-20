@@ -41,6 +41,7 @@ public:
         vertex2 = endVertex;
         value = val;
     }
+    Edge() = default;
     //~Edge();
 
     Vertex getFirstVertex() {
@@ -176,7 +177,6 @@ void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vec
     int index = getVertexIndex(vertex);
     for (int i = 0; i < list[index].second.size(); ++i) {
         Vertex next = list[index].second[i].getSecondVertex();
-        if (next == vertex) next = list[index].second[i].getFirstVertex();
         if (used[next] == 1) {
             isCircle = true;
             return;
