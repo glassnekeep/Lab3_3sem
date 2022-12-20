@@ -8,6 +8,7 @@ using namespace std;
 
 void Presenter::generateGraph(int count) {
     size = count;
+    srand(time(nullptr));
     vector<pair<Vertex, vector<Edge<int>>>> array = vector<pair<Vertex, vector<Edge<int>>>>();
     vector<vector<int>> matrix = vector<vector<int>>();
     matrix.assign(count, vector<int>(count));
@@ -16,8 +17,8 @@ void Presenter::generateGraph(int count) {
         array.emplace_back(vertex, vector<Edge<int>>());//Changed push_back because of IDE hint, may require fixes
     }
     graph = Graph<int>(array);
-    int max = (count * (count - 1)) / 2;
-    int edgeCount = rand() % (max / 2);
+    int max = (count * (count - 1) - 5) / 2;
+    int edgeCount = rand() % (max / 2) + 5;
     for (int i = 0; i < edgeCount; ++i) {
         Vertex vertex1 = { to_string(rand() % count) };
         Vertex vertex2 = { to_string(rand() % count) };
@@ -29,7 +30,12 @@ void Presenter::generateGraph(int count) {
 
 string Presenter::topologicalSort() {
     if (graph.connectivityComponentsResult().size() > 1) return "The graph contains more than 1 component of connectivity\n";
-    vector<Vertex> array = graph.topologicalSortResult();
+    vector<Vertex> array;
+    try {
+        array = graph.topologicalSortResult();
+    } catch (invalid_argument e) {
+        return "Has circle";
+    }
     string result = "Topological sort array:\n";
     for (int i = 0; i < result.size(); ++i) {
         result += "Vertex: " + array[i].name + "\n";
@@ -54,7 +60,15 @@ string Presenter::findShortestPaths() {
     map<pair<Vertex, Vertex>, int> paths = graph.findTheShortestPaths();
     string result = "Shortest paths:\n";
     for (auto& item: paths) {
-        result += "Vertex1 = " + item.first.first.name + ", vertex2 = " + item.first.second.name, ", path = " + to_string(item.second) + "\n";
+        int currentPathLength = item.second;
+        int max = INF;
+        string stringPathLength;
+        if (currentPathLength < max) {
+            stringPathLength = to_string(currentPathLength);
+        } else {
+            stringPathLength = "no path";
+        }
+        result += "Vertex1 = " + item.first.first.name + ", Vertex2 = " + item.first.second.name + ", path = " + stringPathLength + "\n";
     }
     return result;
 }

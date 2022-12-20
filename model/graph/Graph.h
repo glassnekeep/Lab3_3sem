@@ -12,6 +12,8 @@
 #include <map>
 #include <set>
 
+#define INF 50000;
+
 using namespace std;
 
 struct Vertex {
@@ -174,6 +176,7 @@ void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vec
     int index = getVertexIndex(vertex);
     for (int i = 0; i < list[index].second.size(); ++i) {
         Vertex next = list[index].second[i].getSecondVertex();
+        if (next == vertex) next = list[index].second[i].getFirstVertex();
         if (used[next] == 1) {
             isCircle = true;
             return;
@@ -213,7 +216,8 @@ void Graph<T>::dfsForConnectivityComponents(Vertex &vertex, map<Vertex, int> &us
     components.push_back(vertex);
     int index = getVertexIndex(vertex);
     for (int i = 0; i < list[index].second.size(); ++i) {
-        Vertex next = list[index].second[i].getSecondVertex();
+        Vertex next = list[index].second[i].getFirstVertex();
+        if (next == vertex) next = list[index].second[i].getSecondVertex();
         if (!used[next]) dfsForConnectivityComponents(next, used, array, components);
     }
 }
@@ -243,12 +247,22 @@ template<typename T>
 map<pair<Vertex, Vertex>, T> Graph<T>::findTheShortestPaths() {
     map<pair<Vertex, Vertex>, T> matrix = map<pair<Vertex, Vertex>, T>();
     for (int i = 0; i < list.size(); ++i) {
+        for (int j = 0; j < list.size(); ++j) {
+            Vertex vertex1 = list[i].first;
+            Vertex vertex2 = list[j].first;
+            pair<Vertex, Vertex> pair = make_pair(vertex1, vertex2);
+            matrix[pair] = INF;
+        }
+    }
+    for (int i = 0; i < list.size(); ++i) {
         for (int j = 0; j < list[i].second.size(); ++j) {
             Vertex vertex1 = list[i].second[j].getFirstVertex();
             Vertex vertex2 = list[i].second[j].getSecondVertex();
             T value = list[i].second[j].getValue();
-            pair<Vertex, Vertex> pair = make_pair(vertex1, vertex2);
-            matrix[pair] = value;
+            pair<Vertex, Vertex> first = make_pair(vertex1, vertex2);
+            pair<Vertex, Vertex> same = make_pair(vertex2, vertex1);
+            matrix[first] = value;
+            matrix[same] = value;
         }
     }
     for (int k = 0; k < list.size(); ++k) {
@@ -257,9 +271,18 @@ map<pair<Vertex, Vertex>, T> Graph<T>::findTheShortestPaths() {
                 pair<Vertex, Vertex> pair1 = make_pair(list[i].first, list[j].first);
                 pair<Vertex, Vertex> pair2 = make_pair(list[i].first, list[k].first);
                 pair<Vertex, Vertex> pair3 = make_pair(list[k].first, list[j].first);
-                matrix[pair1] = min(matrix[pair1], matrix[pair2] + matrix[pair3]);
+                T max = INF;
+                if (matrix[pair2] < max && matrix[pair3] < max) {
+                    matrix[pair1] = min(matrix[pair1], matrix[pair2] + matrix[pair3]);
+                }
             }
         }
+    }
+    for (int i = 0; i < list.size(); ++i) {
+        Vertex vertex = list[i].first;
+        pair<Vertex, Vertex> same = make_pair(vertex, vertex);
+        T max = INF;
+        matrix[same] = max;
     }
     return matrix;
 }
@@ -282,9 +305,10 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
     map<Vertex, int> tree = map<Vertex, int>();
     for (int i = 0; i < list.size(); ++i) {
         //Added this if myself because there might be a graph with more than 1 connectivity component
-        if (!list[i].second.empty()) tree[list[i].first] = i;
+        //if (!list[i].second.empty()) tree[list[i].first] = i;
+        tree[list[i].first] = i;
     }
-    int cost = 1;
+    int cost = 0;
     for (int i = 0; i < edges.size(); ++i) {
         Vertex vertex1 = edges[i].getFirstVertex();
         Vertex vertex2 = edges[i].getSecondVertex();
@@ -295,7 +319,7 @@ vector<Edge<T>> Graph<T>::findTheMinimumSkeleton() {
             int oldId = tree[vertex2];
             int newId = tree[vertex1];
             for (int j = 0; j < list.size(); ++j) {
-                Vertex vertex = list[i].first;
+                Vertex vertex = list[j].first;
                 if (tree[vertex] == oldId) {
                     tree[vertex] = newId;
                 }
