@@ -28,21 +28,6 @@ void Presenter::generateGraph(int count) {
     }
 }
 
-string Presenter::topologicalSort() {
-    if (graph.connectivityComponentsResult().size() > 1) return "The graph contains more than 1 component of connectivity\n";
-    vector<Vertex> array;
-    try {
-        array = graph.topologicalSortResult();
-    } catch (invalid_argument e) {
-        return "Has circle";
-    }
-    string result = "Topological sort array:\n";
-    for (int i = 0; i < result.size(); ++i) {
-        result += "Vertex: " + array[i].name + "\n";
-    }
-    return result;
-}
-
 string Presenter::connectivityComponents() {
     vector<vector<Vertex>> array = graph.connectivityComponentsResult();
     string result = "Connectivity components:\n";

@@ -85,7 +85,6 @@ private:
     int getVertexIndex(Vertex vertex);
     Vertex getNext(Vertex& vertex);
     void dfsForTopologicalSort(Vertex& vertex, map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, bool& isCircle);
-    void topologicalSort(map<Vertex, int>& used, vector<Vertex>& topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle);
     void dfsForConnectivityComponents(Vertex& vertex, map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components);
     void countComponents(map<Vertex, int>& used, vector<pair<Vertex, vector<Edge<T>>>>& array, vector<Vertex>& components, vector<vector<Vertex>>& allComponents);
     int countEdges();
@@ -100,7 +99,6 @@ public:
     void addVertex(Vertex& vertex);
     void removeVertex(Vertex& vertex);
     void removeEdge(Edge<T>& edge);
-    vector<Vertex> topologicalSortResult();
     vector<vector<Vertex>> connectivityComponentsResult();
     //Here should be strong connectivity components;
     map<pair<Vertex, Vertex>, T> findTheShortestPaths(); //Floyd's algorithm
@@ -186,28 +184,6 @@ void Graph<T>::dfsForTopologicalSort(Vertex& vertex, map<Vertex, int> &used, vec
     used[vertex] = 2;
     topSort.push_back(vertex);
     //Looks like it should work
-}
-
-template<typename T>
-void Graph<T>::topologicalSort(map<Vertex, int> &used, vector<Vertex> &topSort, vector<pair<Vertex, vector<Edge<T>>>> array, int n, bool& isCircle) {
-    for (int i = 0; i < n; ++i ) {
-        Vertex vertex = list[i].first;
-        if (!used[vertex]) dfsForTopologicalSort(array[i].first, used, topSort, array, isCircle);
-    }
-    reverse(topSort.begin(), topSort.end());
-}
-
-template<typename T>
-vector<Vertex> Graph<T>::topologicalSortResult() {
-    map<Vertex, int> used = map<Vertex, int>();
-    vector<Vertex> topSort = vector<Vertex>();
-    bool isCircle = false;
-    topologicalSort(used, topSort, list, list.size(), isCircle);
-    if (isCircle) {
-        throw invalid_argument("Graph contains a circle");
-    } else {
-        return topSort;
-    }
 }
 
 template<typename T>
@@ -362,7 +338,7 @@ string Graph<T>::printGraph() {
     for (int i = 0; i < list.size(); ++i) {
         string currentVertex = string("Vertex: " + list[i].first.name + ", Edges: ");
         for (int j = 0; j < list[i].second.size(); ++j) {
-            currentVertex += "(" + list[i].second[j].getFirstVertex().name + ", " + list[i].second[j].getSecondVertex().name + "), ";
+            currentVertex += "(" + list[i].second[j].getFirstVertex().name + ", " + list[i].second[j].getSecondVertex().name + "), " + "value = " + to_string(list[i].second[j].getValue()) + ", ";
         }
         array += currentVertex + "\n";
     }

@@ -15,7 +15,6 @@ private:
     int size;
 public:
     void generateGraph(int count);
-    string topologicalSort();
     string connectivityComponents();
     string findShortestPaths();
     string findTheMinimumSkeleton();
